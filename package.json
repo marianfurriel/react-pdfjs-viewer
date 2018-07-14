@@ -4,6 +4,10 @@
   "main": "dist/index.js",
   "module": "dist/index.js",
   "files": [ "dist", "README.md" ],
+  "author": {
+    "name": "Mariano Furriel",
+    "email": "mariano.furriel.g@gmail.com"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/marianfurriel/react-pdf-viewer"
@@ -22,7 +26,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "rm -rf dist && NODE_ENV=production babel src/lib --out-dir dist --copy-files --ignore __tests__,spec.js,test.js,__snapshots__",
+    "prepublish": "rm -rf lib && NODE_ENV=production babel src --out-dir lib && webpack mode",
+    "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   }
