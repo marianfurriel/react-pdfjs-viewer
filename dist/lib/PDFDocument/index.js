@@ -16,9 +16,14 @@ import ReactDOM from 'react-dom';
 import PDFJSLib from 'pdfjs-dist';
 import * as PDFJSViewer from 'pdfjs-dist/web/pdf_viewer';
 import cx from 'classnames';
-import { PDF_MESSAGES } from './constants';
 import 'pdfjs-dist/web/pdf_viewer.css';
 import './styles.css';
+import Viewer from './Viewer';
+
+export var PDF_MESSAGES = {
+  LOADING: 'Loading the document. Please wait...',
+  ERROR: 'Error: The document could not be loaded.'
+};
 
 var PDFDocument = function (_React$Component) {
   _inherits(PDFDocument, _React$Component);
@@ -65,28 +70,33 @@ var PDFDocument = function (_React$Component) {
     }));
 
     _this.zoomIn = function () {
-      _this.pdfViewer.currentScale += _this.props.zoomFactor;
+      _this.viewer.zoomIn();
     };
 
     _this.zoomOut = function () {
-      _this.pdfViewer.currentScale -= _this.props.zoomFactor;
+      _this.viewer.zoomOut();
     };
 
-    _this.initEventBus();
     return _this;
   }
 
   _createClass(PDFDocument, [{
+    key: 'shouldComponentUpdate',
+    value: function shouldComponentUpdate(nextProps) {
+      if (this.props.document !== nextProps.document) return false;
+      return true;
+    }
+  }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
       var _this3 = this;
 
-      var container = ReactDOM.findDOMNode(this);
+      // const container = ReactDOM.findDOMNode(this);
 
-      this.pdfViewer = new PDFJSViewer.PDFViewer({
-        container: container,
-        eventBus: this.eventBus
-      });
+      // this.pdfViewer = new PDFJSViewer.PDFViewer({
+      //   container,
+      //   eventBus: this.eventBus,
+      // });
 
       this.setState({ loading: true }, _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee2() {
         return _regeneratorRuntime.wrap(function _callee2$(_context2) {
@@ -105,43 +115,38 @@ var PDFDocument = function (_React$Component) {
       })));
     }
   }, {
-    key: 'initEventBus',
-    value: function initEventBus() {
-      var _this4 = this;
-
-      var eventBus = new PDFJSViewer.EventBus();
-
-      eventBus.on('pagesinit', function (args) {
-        _this4.pdfViewer.currentScaleValue = _this4.props.documentScale;
-        if (_this4.props.onPagesInit) _this4.props.onPagesInit(args);
-      });
-
-      eventBus.on('pagechange', function (args) {
-        if (_this4.props.onPageChange) _this4.props.onPageChange(args);
-      });
-
-      this.eventBus = eventBus;
-    }
-  }, {
-    key: 'componentDidUpdate',
-    value: function componentDidUpdate() {
-      this.pdfViewer.setDocument(this.state.document);
-    }
-  }, {
     key: 'render',
     value: function render() {
-      var containerClassName = cx(this.props.containerClassName);
-      var viewerClassName = cx('viewer', this.props.viewerClassName, 'pdfViewer');
+      var _this4 = this;
+
+      // const containerClassName = cx(this.props.containerClassName);
+      // const viewerClassName = cx('vieweNodeList, this.props.viewerClassName, 'pdfViewer');
 
       var ComponentOnLoading = this.props.componentOnLoading || 'div';
       var ComponentOnError = this.props.componentOnError || 'div';
 
+      if (this.state.loading) return React.createElement(ComponentOnLoading, null);
+
+      if (this.state.error) return React.createElement(ComponentOnError, null);
+
+      if (!this.state.document) return React.createElement(
+        'div',
+        null,
+        'loading'
+      );
+
       return React.createElement(
         'div',
-        { className: containerClassName },
-        this.state.loading && React.createElement(ComponentOnLoading, null),
-        this.state.error && React.createElement(ComponentOnError, null),
-        React.createElement('div', { className: viewerClassName })
+        null,
+        React.createElement(Viewer, {
+          document: this.state.document,
+          documentScale: this.props.documentScale,
+          containerClassName: this.props.containerClassName,
+          viewerClassName: this.props.viewerClassName,
+          ref: function ref(node) {
+            return _this4.viewer = node;
+          }
+        })
       );
     }
   }]);

@@ -1,17 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ReactDOM from 'react-dom';
 import PDFJSLib from 'pdfjs-dist';
-import * as PDFJSViewer from 'pdfjs-dist/web/pdf_viewer';
-import cx from 'classnames';
-import { PDF_MESSAGES } from './constants';
+import Viewer from './Viewer';
 import 'pdfjs-dist/web/pdf_viewer.css';
 import './styles.css';
 
+export const PDF_MESSAGES = {
+  LOADING: 'Loading the document. Please wait...',
+  ERROR: 'Error: The document could not be loaded.',
+};
 class PDFDocument extends React.Component {
   constructor(props) {
     super(props);
-    this.initEventBus();
   }
 
   static propTypes = {
@@ -41,13 +41,6 @@ class PDFDocument extends React.Component {
   }
 
   componentDidMount() {
-    const container = ReactDOM.findDOMNode(this);
-
-    this.pdfViewer = new PDFJSViewer.PDFViewer({
-      container,
-      eventBus: this.eventBus,
-    });
-
     this.setState({ loading: true }, async () => {
       await this.loadDocument();
     });
@@ -63,51 +56,31 @@ class PDFDocument extends React.Component {
     }
   };
 
-  initEventBus() {
-    const eventBus = new PDFJSViewer.EventBus();
-    
-    eventBus.on('pagesinit', args => {
-      this.pdfViewer.currentScaleValue = this.props.documentScale;
-      if (this.props.onPagesInit) this.props.onPagesInit(args);
-    });
+  scrollToPage = pageNumber => this.viewer.scrollToPage(pageNumber);
 
-    eventBus.on('pagechange', args => {
-      if (this.props.onPageChange) this.props.onPageChange(args);
-    });
+  zoomIn = () => this.viewer.zoomIn();
 
-    this.eventBus = eventBus;
-  }
-
-  componentDidUpdate() {
-    this.pdfViewer.setDocument(this.state.document);
-  }
-
-  zoomIn = () => {
-    this.pdfViewer.currentScale += this.props.zoomFactor;
-  }
-
-  zoomOut = () => {
-    this.pdfViewer.currentScale -= this.props.zoomFactor;
-  }
+  zoomOut = () => this.viewer.zoomOut();
 
   render() {
-    const containerClassName = cx(this.props.containerClassName);
-    const viewerClassName = cx('viewer', this.props.viewerClassName, 'pdfViewer');
-
     const ComponentOnLoading = this.props.componentOnLoading || 'div';
     const ComponentOnError = this.props.componentOnError ||'div';
 
+    if (this.state.loading) return <ComponentOnLoading />;
+    
+    if (this.state.error) return <ComponentOnError />;
+
+    if (!this.state.document) return <ComponentOnLoading />;
 
     return (
-      <div className={containerClassName} >
-        { 
-          this.state.loading && <ComponentOnLoading />
-        }
-        { 
-          this.state.error && <ComponentOnError />
-        }
-        <div className={viewerClassName} />
-      </div>
+      <Viewer
+        document={this.state.document}
+        documentScale={this.props.documentScale}
+        onPageChange={this.props.onPageChange}
+        containerClassName={this.props.containerClassName}
+        viewerClassName={this.props.viewerClassName}
+        ref={node => this.viewer = node}
+      />  
     );
   }
 }
