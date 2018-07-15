@@ -1,0 +1,17 @@
+.Viewer {
+  background-color: white;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+.Viewer > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.Viewer > div > div {
+  margin-bottom: 10px;
+}

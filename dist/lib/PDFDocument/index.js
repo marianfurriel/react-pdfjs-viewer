@@ -11,23 +11,24 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import PDFJSLib from 'pdfjs-dist';
 import * as PDFJSViewer from 'pdfjs-dist/web/pdf_viewer';
 import cx from 'classnames';
+import { PDF_MESSAGES } from './constants';
 import 'pdfjs-dist/web/pdf_viewer.css';
 import './styles.css';
-import { PDF_MESSAGES } from './constants';
 
-var Viewer = function (_React$Component) {
-  _inherits(Viewer, _React$Component);
+var PDFDocument = function (_React$Component) {
+  _inherits(PDFDocument, _React$Component);
 
-  function Viewer(props) {
+  function PDFDocument(props) {
     var _this2 = this;
 
-    _classCallCheck(this, Viewer);
+    _classCallCheck(this, PDFDocument);
 
-    var _this = _possibleConstructorReturn(this, (Viewer.__proto__ || Object.getPrototypeOf(Viewer)).call(this, props));
+    var _this = _possibleConstructorReturn(this, (PDFDocument.__proto__ || Object.getPrototypeOf(PDFDocument)).call(this, props));
 
     _this.state = {
       loading: null,
@@ -35,7 +36,7 @@ var Viewer = function (_React$Component) {
       document: null
     };
     _this.loadDocument = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee() {
-      var document;
+      var document, errorComponent;
       return _regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -46,37 +47,45 @@ var Viewer = function (_React$Component) {
 
             case 3:
               document = _context.sent;
-
-              debugger;
               return _context.abrupt('return', _this.setState({ document: document, loading: false }));
 
-            case 8:
-              _context.prev = 8;
+            case 7:
+              _context.prev = 7;
               _context.t0 = _context['catch'](0);
+              errorComponent = _this.props.componentOnError;
 
-              _this.setState({ error: PDF_MESSAGES.ERROR });
+              _this.setState({ loading: false, error: errorComponent });
 
             case 11:
             case 'end':
               return _context.stop();
           }
         }
-      }, _callee, _this2, [[0, 8]]);
+      }, _callee, _this2, [[0, 7]]);
     }));
+
+    _this.zoomIn = function () {
+      _this.pdfViewer.currentScale += _this.props.zoomFactor;
+    };
+
+    _this.zoomOut = function () {
+      _this.pdfViewer.currentScale -= _this.props.zoomFactor;
+    };
 
     _this.initEventBus();
     return _this;
   }
 
-  _createClass(Viewer, [{
+  _createClass(PDFDocument, [{
     key: 'componentDidMount',
     value: function componentDidMount() {
       var _this3 = this;
 
-      var viewerContainer = ReactDOM.findDOMNode(this);
-      console.log(PDFJSViewer.PDFViewer);
+      var container = ReactDOM.findDOMNode(this);
+
       this.pdfViewer = new PDFJSViewer.PDFViewer({
-        container: viewerContainer
+        container: container,
+        eventBus: this.eventBus
       });
 
       this.setState({ loading: true }, _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee2() {
@@ -98,10 +107,17 @@ var Viewer = function (_React$Component) {
   }, {
     key: 'initEventBus',
     value: function initEventBus() {
+      var _this4 = this;
+
       var eventBus = new PDFJSViewer.EventBus();
 
-      eventBus.on('pagesinit', function () {
-        console.log('init event bus');
+      eventBus.on('pagesinit', function (args) {
+        _this4.pdfViewer.currentScaleValue = _this4.props.documentScale;
+        if (_this4.props.onPagesInit) _this4.props.onPagesInit(args);
+      });
+
+      eventBus.on('pagechange', function (args) {
+        if (_this4.props.onPageChange) _this4.props.onPageChange(args);
       });
 
       this.eventBus = eventBus;
@@ -117,15 +133,35 @@ var Viewer = function (_React$Component) {
       var containerClassName = cx(this.props.containerClassName);
       var viewerClassName = cx('viewer', this.props.viewerClassName, 'pdfViewer');
 
+      var ComponentOnLoading = this.props.componentOnLoading || 'div';
+      var ComponentOnError = this.props.componentOnError || 'div';
+
       return React.createElement(
         'div',
         { className: containerClassName },
+        this.state.loading && React.createElement(ComponentOnLoading, null),
+        this.state.error && React.createElement(ComponentOnError, null),
         React.createElement('div', { className: viewerClassName })
       );
     }
   }]);
 
-  return Viewer;
+  return PDFDocument;
 }(React.Component);
 
-export default Viewer;
+PDFDocument.propTypes = {
+  src: PropTypes.string,
+  documentScale: PropTypes.string,
+  zoomFactor: PropTypes.number,
+  containerClassName: PropTypes.string,
+  viewerClassName: PropTypes.string,
+  onPagesInit: PropTypes.func,
+  onPageChange: PropTypes.func
+};
+PDFDocument.defaultProps = {
+  zoomFactor: 0.1,
+  documentScale: 'page-width'
+};
+
+
+export default PDFDocument;
