@@ -31,11 +31,15 @@ var Viewer = function (_Component) {
     };
 
     _this.scrollToPage = function (pageNumber) {
-      _this.pdfViewer.viewer.scrollIntoView('[data-page-number="' + pageNumber + '"]');
+      if (_this.pdfViewer.container) {
+        _this.pdfViewer.container.querySelector('[data-page-number="' + pageNumber + '"]').scrollIntoView();
+      }
     };
 
     _this.scrollToPosition = function (position) {
-      _this.pdfViewer.viewer.scrollIntoView({ behavior: 'instant', top: position });
+      if (_this.pdfViewer.viewer) {
+        _this.pdfViewer.viewer.scrollIntoView({ behavior: 'instant', top: position });
+      }
     };
 
     _this.zoomOut = function () {
