@@ -11,6 +11,10 @@ class Viewer extends Component {
     this.initEventBus();
   }
 
+  static defaultProps = {
+    searchText: '',
+  };
+
   componentDidMount() {
     const viewerContainer = ReactDOM.findDOMNode(this);
     this.pdfViewer = new PDFJSViewer.PDFViewer({
