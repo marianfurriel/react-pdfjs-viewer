@@ -12,13 +12,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import ReactDOM from 'react-dom';
 import PDFJSLib from 'pdfjs-dist';
-import * as PDFJSViewer from 'pdfjs-dist/web/pdf_viewer';
-import cx from 'classnames';
+import Viewer from './Viewer';
 import 'pdfjs-dist/web/pdf_viewer.css';
 import './styles.css';
-import Viewer from './Viewer';
 
 export var PDF_MESSAGES = {
   LOADING: 'Loading the document. Please wait...',
@@ -46,35 +43,44 @@ var PDFDocument = function (_React$Component) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              _context.prev = 0;
-              _context.next = 3;
+              console.log(PDFJSLib);
+              _context.prev = 1;
+              _context.next = 4;
               return PDFJSLib.getDocument(_this.props.src);
 
-            case 3:
+            case 4:
               document = _context.sent;
               return _context.abrupt('return', _this.setState({ document: document, loading: false }));
 
-            case 7:
-              _context.prev = 7;
-              _context.t0 = _context['catch'](0);
+            case 8:
+              _context.prev = 8;
+              _context.t0 = _context['catch'](1);
               errorComponent = _this.props.componentOnError;
 
               _this.setState({ loading: false, error: errorComponent });
 
-            case 11:
+            case 12:
             case 'end':
               return _context.stop();
           }
         }
-      }, _callee, _this2, [[0, 7]]);
+      }, _callee, _this2, [[1, 8]]);
     }));
 
+    _this.scrollToPage = function (pageNumber) {
+      return _this.viewer.scrollToPage(pageNumber);
+    };
+
+    _this.scrollToPosition = function (position) {
+      return _this.viewer.scrollToPosition(position);
+    };
+
     _this.zoomIn = function () {
-      _this.viewer.zoomIn();
+      return _this.viewer.zoomIn();
     };
 
     _this.zoomOut = function () {
-      _this.viewer.zoomOut();
+      return _this.viewer.zoomOut();
     };
 
     return _this;
@@ -90,13 +96,6 @@ var PDFDocument = function (_React$Component) {
     key: 'componentDidMount',
     value: function componentDidMount() {
       var _this3 = this;
-
-      // const container = ReactDOM.findDOMNode(this);
-
-      // this.pdfViewer = new PDFJSViewer.PDFViewer({
-      //   container,
-      //   eventBus: this.eventBus,
-      // });
 
       this.setState({ loading: true }, _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee2() {
         return _regeneratorRuntime.wrap(function _callee2$(_context2) {
@@ -119,9 +118,6 @@ var PDFDocument = function (_React$Component) {
     value: function render() {
       var _this4 = this;
 
-      // const containerClassName = cx(this.props.containerClassName);
-      // const viewerClassName = cx('vieweNodeList, this.props.viewerClassName, 'pdfViewer');
-
       var ComponentOnLoading = this.props.componentOnLoading || 'div';
       var ComponentOnError = this.props.componentOnError || 'div';
 
@@ -129,25 +125,21 @@ var PDFDocument = function (_React$Component) {
 
       if (this.state.error) return React.createElement(ComponentOnError, null);
 
-      if (!this.state.document) return React.createElement(
-        'div',
-        null,
-        'loading'
-      );
+      if (!this.state.document) return React.createElement(ComponentOnLoading, null);
 
-      return React.createElement(
-        'div',
-        null,
-        React.createElement(Viewer, {
-          document: this.state.document,
-          documentScale: this.props.documentScale,
-          containerClassName: this.props.containerClassName,
-          viewerClassName: this.props.viewerClassName,
-          ref: function ref(node) {
-            return _this4.viewer = node;
-          }
-        })
-      );
+      return React.createElement(Viewer, {
+        document: this.state.document,
+        searchText: this.props.searchText,
+        enableSearchText: this.props.enableSearchText,
+        documentScale: this.props.documentScale,
+        containerClassName: this.props.containerClassName,
+        viewerClassName: this.props.viewerClassName,
+        onPageChange: this.props.onPageChange,
+        onPagesInit: this.props.onPagesInit,
+        ref: function ref(node) {
+          return _this4.viewer = node;
+        }
+      });
     }
   }]);
 
@@ -156,6 +148,8 @@ var PDFDocument = function (_React$Component) {
 
 PDFDocument.propTypes = {
   src: PropTypes.string,
+  searchText: PropTypes.string,
+  enableSearchText: PropTypes.bool,
   documentScale: PropTypes.string,
   zoomFactor: PropTypes.number,
   containerClassName: PropTypes.string,
@@ -165,6 +159,7 @@ PDFDocument.propTypes = {
 };
 PDFDocument.defaultProps = {
   zoomFactor: 0.1,
+  enableSearchText: true,
   documentScale: 'page-width'
 };
 

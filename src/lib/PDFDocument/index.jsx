@@ -16,6 +16,8 @@ class PDFDocument extends React.Component {
 
   static propTypes = {
     src: PropTypes.string,
+    searchText: PropTypes.string,
+    enableSearchText: PropTypes.bool,
     documentScale: PropTypes.string,
     zoomFactor: PropTypes.number,
     containerClassName: PropTypes.string,
@@ -26,6 +28,7 @@ class PDFDocument extends React.Component {
 
   static defaultProps = {
     zoomFactor: 0.1,
+    enableSearchText: true,
     documentScale: 'page-width',
   }
 
@@ -47,6 +50,7 @@ class PDFDocument extends React.Component {
   }
 
   loadDocument = async () => {
+    console.log(PDFJSLib)
     try {
       const document = await PDFJSLib.getDocument(this.props.src);
       return this.setState({ document, loading: false });
@@ -57,6 +61,8 @@ class PDFDocument extends React.Component {
   };
 
   scrollToPage = pageNumber => this.viewer.scrollToPage(pageNumber);
+
+  scrollToPosition = position => this.viewer.scrollToPosition(position);
 
   zoomIn = () => this.viewer.zoomIn();
 
@@ -75,10 +81,13 @@ class PDFDocument extends React.Component {
     return (
       <Viewer
         document={this.state.document}
+        searchText={this.props.searchText}
+        enableSearchText={this.props.enableSearchText}
         documentScale={this.props.documentScale}
-        onPageChange={this.props.onPageChange}
         containerClassName={this.props.containerClassName}
         viewerClassName={this.props.viewerClassName}
+        onPageChange={this.props.onPageChange}
+        onPagesInit={this.props.onPagesInit}
         ref={node => this.viewer = node}
       />  
     );

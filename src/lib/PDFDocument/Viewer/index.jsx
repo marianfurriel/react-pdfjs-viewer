@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
-import * as PDFJSViewer from 'pdfjs-dist/web/pdf_viewer.js';
+import * as PDFJSViewer from 'pdfjs-dist/web/pdf_viewer';
 import 'pdfjs-dist/web/pdf_viewer.css';
 
 class Viewer extends Component {
@@ -21,8 +21,8 @@ class Viewer extends Component {
     this.pdfFindController = new PDFJSViewer.PDFFindController({
       pdfViewer: this.pdfViewer,
     });
-    this.pdfViewer.setFindController(this.pdfFindController);
 
+    this.pdfViewer.setFindController(this.pdfFindController);
     this.pdfViewer.setDocument(this.props.document);
   }
 
@@ -33,24 +33,46 @@ class Viewer extends Component {
     return false;
   }
 
+  componentDidUpdate(prevProps) {
+    if (this.props.enableSearchText && prevProps.searchText !== this.props.searchText) {
+      this.searchForText();
+    }
+  }
+
   initEventBus() {
-    const eventBus = new PDFJSViewer.EventBus();
+    this.eventBus = new PDFJSViewer.EventBus();
     
-    eventBus.on('pagesinit', args => {
+    this.eventBus.on('pagesinit', args => {
       this.pdfViewer.currentScaleValue = this.props.documentScale;
       if (this.props.onPagesInit) this.props.onPagesInit(args);
+      if (this.props.enableSearchText) this.searchForText();
     });
 
-    eventBus.on('pagechange', args => {
+    this.eventBus.on('pagechange', args => {
       if (this.props.onPageChange) this.props.onPageChange(args);
     });
+  }
 
-    this.eventBus = eventBus;
+  searchForText = () => {
+    if (this.pdfFindController) {
+      this.pdfFindController.executeCommand('find', {
+        query: this.props.searchText,
+        highlightAll: true,
+      });
+    }
   }
 
   scrollToPage = pageNumber => {
-    scrollTo(`[data-page-number="${pageNumber}"]`, this.pdfViewer.container);
+    if (this.pdfViewer.container) {
+      this.pdfViewer.container.querySelector(`[data-page-number="${pageNumber}"]`).scrollIntoView();
+    }
   };
+
+  scrollToPosition = position => {
+    if (this.pdfViewer.viewer) {
+      this.pdfViewer.viewer.scrollIntoView({ behavior: 'instant', top: position });
+    }
+  }
 
   zoomOut = () => {
     this.pdfViewer.currentScale -= 0.1;
@@ -71,10 +93,5 @@ class Viewer extends Component {
     );
   }
 }
-
-Viewer.propTypes = {
-  document: PropTypes.object,
-  onInit: PropTypes.func.isRequired,
-};
 
 export default Viewer;

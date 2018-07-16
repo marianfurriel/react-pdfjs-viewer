@@ -82,6 +82,7 @@ var PageIndicatorWrapper = function (_React$Component2) {
     value: function render() {
       var _this4 = this;
 
+      console.log(this.state.currentPage);
       return React.createElement(
         'div',
         null,
@@ -109,6 +110,80 @@ var PageIndicatorWrapper = function (_React$Component2) {
   return PageIndicatorWrapper;
 }(React.Component);
 
+var FindTextWrapper = function (_React$Component3) {
+  _inherits(FindTextWrapper, _React$Component3);
+
+  function FindTextWrapper() {
+    var _ref3;
+
+    var _temp2, _this5, _ret2;
+
+    _classCallCheck(this, FindTextWrapper);
+
+    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
+
+    return _ret2 = (_temp2 = (_this5 = _possibleConstructorReturn(this, (_ref3 = FindTextWrapper.__proto__ || Object.getPrototypeOf(FindTextWrapper)).call.apply(_ref3, [this].concat(args))), _this5), _this5.state = {
+      searchText: '',
+      pageNumber: 1
+    }, _this5.changeText = function (event) {
+      return _this5.setState({ searchText: event.target.value });
+    }, _this5.changePageNumber = function (event) {
+      _this5.setState({ pageNumber: event.target.value }, function () {
+        _this5.viewer.scrollToPage(_this5.state.pageNumber);
+      });
+    }, _temp2), _possibleConstructorReturn(_this5, _ret2);
+  }
+
+  _createClass(FindTextWrapper, [{
+    key: 'render',
+    value: function render() {
+      var _this6 = this;
+
+      return React.createElement(
+        'div',
+        null,
+        React.createElement(
+          'div',
+          null,
+          React.createElement(
+            'h3',
+            null,
+            'Find text:'
+          ),
+          React.createElement('input', { type: 'text', onChange: this.changeText })
+        ),
+        React.createElement(
+          'div',
+          null,
+          React.createElement(
+            'h3',
+            null,
+            'Scroll To:'
+          ),
+          React.createElement('input', { type: 'number', value: this.state.pageNumber, onChange: this.changePageNumber })
+        ),
+        React.createElement(PDFDocument, {
+          src: PdfSample,
+          pageNumber: this.state.pageNumber,
+          searchText: this.state.searchText,
+          viewerClassName: "Viewer",
+          onPageChange: function onPageChange(_ref4) {
+            var pageNumber = _ref4.pageNumber;
+            return _this6.setState({ currentPage: pageNumber });
+          },
+          ref: function ref(node) {
+            _this6.viewer = node;
+          }
+        })
+      );
+    }
+  }]);
+
+  return FindTextWrapper;
+}(React.Component);
+
 export default [{
   component: PDFDocument,
   name: 'Basic',
@@ -128,4 +203,10 @@ export default [{
 }, {
   component: PageIndicatorWrapper,
   name: 'Page Indicator'
+}, {
+  component: FindTextWrapper,
+  name: 'Text finder',
+  props: {
+    containerClassName: 'Viewer'
+  }
 }];

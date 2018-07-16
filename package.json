@@ -1,6 +1,6 @@
 {
   "name": "react-pdfjs-viewer",
-  "version": "0.1.10",
+  "version": "0.1.14",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "files": [
@@ -24,6 +24,7 @@
     "prepublish": "rm -rf dist build && NODE_ENV=production babel src --copy-files --out-dir dist",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js --env=jsdom",
+    "release:patch": "npm version patch && npm publish",
     "cosmos": "cosmos --config ./config/cosmos.config.js"
   },
   "devDependencies": {
